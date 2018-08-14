@@ -1,88 +1,30 @@
 /* @flow */
 
-const {assign, create} = Object
-
-declare var Component: typeof React$Component
+import {Component, PureComponent, type ElementProps} from 'react'
 
 
-declare class $React$Component<Props, State = void, DP = {}> extends React$Component<Props, State> {
-  // fields
+// function f<F, B>(...folders: F) {
+//   declare function d<T, B>(Base: B): Class<React$Component<{
+//     ...$Exact<T>,
+//     ...$Exact<React$ElementConfig<B>>,
+//   }>>
+//
+//   return d
+// }
+//
 
-  props: Props;
-  state: State;
+function f<F, B>(...folders: F) {
+  declare function d<T, B>(Base: B): $Call<
+    & ((X: Class<typeof Component>) => Class<React$Component<T>>)
+    & ((X: Class<typeof PureComponent>) => Class<React$Component<T>>)
+    & ((any) => Class<React$Component<{
+        ...$Exact<React$ElementConfig<B>>,
+        ...$Exact<T>,
+    }>>)
+  , B>
 
-  // action methods
-
-  setState(
-    partialState: $Shape<State> | ((State, Props) => $Shape<State> | void),
-    callback?: () => mixed,
-  ): void;
-
-  forceUpdate(callback?: () => void): void;
-
-  // lifecycle methods
-
-  constructor(props?: Props, context?: any): void;
-  render(): React$Node;
-  componentDidMount(): mixed;
-  componentWillReceiveProps(
-    nextProps: Props,
-    nextContext: any,
-  ): mixed;
-  shouldComponentUpdate(
-    nextProps: Props,
-    nextState: State,
-    nextContext: any,
-  ): boolean;
-  componentWillUpdate(
-    nextProps: Props,
-    nextState: State,
-    nextContext: any,
-  ): mixed;
-  componentDidUpdate(
-    prevProps: Props,
-    prevState: State,
-    prevContext: any,
-  ): mixed;
-  componentWillUnmount(): mixed;
-
-  // long tail of other stuff not modeled very well
-
-  refs: any;
-  context: any;
-  getChildContext(): any;
-  static displayName?: ?string;
-  static childContextTypes: any;
-  static contextTypes: any;
-  static propTypes: $Subtype<{[_: $Keys<Props>]: any}>;
-
-  // static defaultProps: DP
-}
-
-declare function apply<Fn, Fs, F1, F2, F3>(Fn, Fs): $Call<(
-    & (([F1]) => $Call<Fn, F1>)
-    & (([F1, F2]) => $Call<Fn, F1, F2>)
-    & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
-), Fs>
-
-type Apply<_, Fn, Fs> = $Call<typeof apply, Fn, Fs, _>
-
-const Fold = (options) => {
-  declare function f<_, F>(...folders: F): <P>(Base: any) => Class<$React$Component<$Exact<$Call<Apply<
-    _,
-    $Compose,
-    $TupleMap<F, <V, X>(V) => ((X) => {...$Exact<X>, ...$Exact<$PropertyType<V, 'props'>>})>,
-  >, P>>, void, $Exact<$Call<Apply<
-    _,
-    $Compose,
-    $TupleMap<F, <V, X>(V) => ((X) => {...$Exact<X>, ...$Exact<$PropertyType<V, 'props'>>})>,
-  >, {}>>>>
-
-  return f
+  return d
 }
 
 
-export const foldl = Fold({left: true})
-export const foldr = Fold({left: false})
-
-export default foldl
+export default f
