@@ -48,10 +48,17 @@ const Fold = options => (...folders) =>
 
             this[FOLDERS].push(value)
 
-            const {state, props, ...rest} =
-              (typeof folder === 'function'
-                ? folder(value)
-                : folder) || {}
+            const {
+              state,
+              props,
+              componentDidMount,
+              shouldComponentUpdate,
+              componentDidUpdate,
+              componentWillUnmount,
+              ...rest
+            } = (typeof folder === 'function'
+              ? folder(value)
+              : folder) || {}
 
             assign(this.state, state)
 
@@ -64,6 +71,11 @@ const Fold = options => (...folders) =>
               }
 
               value[PROPS] = true
+
+              value.componentDidMount = componentDidMount
+              value.shouldComponentUpdate = shouldComponentUpdate
+              value.componentDidUpdate = componentDidUpdate
+              value.componentWillUnmount = componentWillUnmount
             }
 
             assign(this, rest)
@@ -73,13 +85,31 @@ const Fold = options => (...folders) =>
           this.render = this[UPDATE]
         }
 
-        [LIFT] = (props) => {
-          if (this[FOLDERS][this._offset]) {
-            let ctx
+        componentDidMount() {
+          for (let i = 0; i < this[FOLDERS].length; i++) {
+            if (this[FOLDERS][i].componentDidMount) {
+              this[FOLDERS][i].componentDidMount()
+            }
+          }
+        }
 
+        componentWillUnmount() {
+          for (let i = 0; i < this[FOLDERS].length; i++) {
+            if (this[FOLDERS][i].componentWillUnmount) {
+              this[FOLDERS][i].componentWillUnmount()
+            }
+          }
+        }
+
+        [LIFT] = (props) => {
+          let ctx
+          let prevProps
+
+          if (this[FOLDERS][this._offset]) {
             do {
               ctx = this[FOLDERS][this._offset]
 
+              prevProps = ctx.props
               ctx.props = props
 
               this._offset++
@@ -91,7 +121,20 @@ const Fold = options => (...folders) =>
           const {length: len} = this[UPDATERS]
 
           if (this._i < len) {
-            return this[UPDATERS][this._i](props)
+            let shouldUpdate = true
+            if (ctx.shouldComponentUpdate) {
+              shouldUpdate = ctx.shouldComponentUpdate(prevProps)
+            }
+
+            const cached = !!ctx.CACHE
+
+            ctx.CACHE = (!shouldUpdate && ctx.CACHE) ? ctx.CACHE : this[UPDATERS][this._i](props)
+
+            if (cached && ctx.componentDidUpdate) {
+              ctx.componentDidUpdate(prevProps)
+            }
+
+            return ctx.CACHE
           } else if (this._i > len) {
             if (process.env.NODE_ENV === 'development') {
               throw new Error('It looks like you called `lift` more than once in the handler')
