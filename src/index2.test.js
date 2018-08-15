@@ -10,9 +10,8 @@ const enhance = fold({
   props: lift => props => lift({...props, b: 'haha'}),
 })
 
-export default class App extends enhance<{hoho: 's'}>(Component) {
+class App extends enhance(Component) {
   render() {
-    console.log(this.$props)
     console.log(this.props)
 
     const z = this.props.test.z
@@ -21,8 +20,12 @@ export default class App extends enhance<{hoho: 's'}>(Component) {
   }
 }
 
+export default enhance.of(App)
+
+const Enhanced = enhance.of(App)
+
 const Test = () => (
-  <App />
+  <Enhanced lol="lol" />
 )
 
 const X = (props: {a: 1}) => <div />

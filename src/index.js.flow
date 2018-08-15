@@ -1,30 +1,54 @@
 /* @flow */
 
-import {Component, PureComponent, type ElementProps} from 'react'
+import React, {Component, PureComponent, type ElementProps, type Node} from 'react'
 
 
-// function f<F, B>(...folders: F) {
-//   declare function d<T, B>(Base: B): Class<React$Component<{
-//     ...$Exact<T>,
-//     ...$Exact<React$ElementConfig<B>>,
-//   }>>
-//
-//   return d
-// }
-//
+class $React$Component<Props, State = void, DP = {}> extends Component<Props, State> {
+  // fields
 
-function f<F, B>(...folders: F) {
-  declare function d<T, B>(Base: B): $Call<
-    & ((X: Class<typeof Component>) => Class<React$Component<T>>)
-    & ((X: Class<typeof PureComponent>) => Class<React$Component<T>>)
-    & ((any) => Class<React$Component<{
-        ...$Exact<React$ElementConfig<B>>,
-        ...$Exact<T>,
-    }>>)
-  , B>
+  props: Props;
+  state: State;
 
-  return d
+  static Enhanced: Class<React$Component<DP, State>>
 }
+
+class Test<T: {C: ComponentType<*>}> extends Component<T> {
+  render() {
+    const {C, ...props} = this.props
+
+    return <C {...props} />
+  }
+}
+
+function rndr<T>(x: T) {
+  declare class L extends Test<T> {}
+
+  return <L {...x} />
+}
+
+declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
+    & (([F1]) => $Call<Fn, F1>)
+    & (([F1, F2]) => $Call<Fn, F1, F2>)
+    & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
+    & (([F1, F2, F3, F4]) => $Call<Fn, F1, F2, F3, F4>)
+    & (([F1, F2, F3, F4, F5]) => $Call<Fn, F1, F2, F3, F4, F5>)
+), Fs>
+
+type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
+
+
+type Mapper<F> = $TupleMap<F, <A, X, V: {props: (A => Node) => (X) => Node}>(V) => ((X) => A)>
+
+declare function f<$, F>(...folders: F): ({
+  of: (any) => Class<React$Component<{lol: 'lol'}>>,
+  [[call]]: (<P>(Base: typeof React$Component) =>
+    Class<$React$Component<{
+      ...$Exact<$ObjMap<$Call<Apply<
+        $ComposeReverse,
+        Mapper<F>,
+      >, (*)>, <V>(V) => V>>,
+    }, void>>)
+})
 
 
 export default f
