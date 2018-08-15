@@ -5,6 +5,26 @@ import React, {Component} from 'react'
 import fold, {$React$Component} from './'
 
 const enhance = fold(
+  _ => class extends _ {
+    props = lift => (props: {hoh: 'x'}) => lift({...props, a: 1, heh: props.hoh})
+  },
+  _ => class extends _ {
+    onClick() {
+      super.onClick();
+
+      console.log('x')
+    }
+
+    toggle() {
+      this.onClick()
+    }
+  },
+  _ => class extends _ {
+    props = lift => props => lift({...props, c: 'hehe'})
+  },
+)
+
+const enhance = fold(
   {
     props: lift => (props: {hoh: 'x'}) => lift({...props, a: 1, heh: props.hoh}),
   },

@@ -3,13 +3,12 @@
 import React, {Component, PureComponent, type ElementProps, type Node} from 'react'
 
 
-class $React$Component<Props, State = void, DP = {}> extends Component<Props, State> {
-  // fields
+export class $React$Component<T, State = {}> extends Component<$PropertyType<T, 'props'>, State> {
+  $: T;
 
-  props: Props;
-  state: State;
-
-  static Enhanced: Class<React$Component<DP, State>>
+  // of(fn) {
+  //   return fn.bind(this.$)
+  // }
 }
 
 class Test<T: {C: ComponentType<*>}> extends Component<T> {
@@ -37,16 +36,33 @@ declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
 type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
 
 
-type Mapper<F> = $TupleMap<F, <A, X, V: {props: (A => Node) => (X) => Node}>(V) => ((X) => A)>
+// type Mapper<F> = $TupleMap<F, <C, A, X, V: (
+//   | ({props: (A => Node) => (X) => Node})
+//   | ((string) => {props: (A => Node) => (X) => Node})
+// )>(V) => ((X) => A)>
+
+type Mapper<F> = $TupleMap<F, (
+  & (<A, C, V: {props: (A => Node) => ($PropertyType<C, 'props'>) => Node}>(V) => ((C) => ({
+    ...$Exact<C>,
+    ...$Exact<V>,
+    props: A
+  })))
+  & (<A, C, V: {props: (A => Node) => ($PropertyType<C, 'props'>) => Node}>(C => V) => ((C) => {
+    ...$Exact<C>,
+    ...$Exact<V>,
+    props: A
+  }))
+)>
 
 declare function f<$, F>(...folders: F): ({
   of: (any) => Class<React$Component<{lol: 'lol'}>>,
-  [[call]]: (<P>(Base: typeof React$Component) =>
+  [[call]]: (<B>(Base: *) =>
     Class<$React$Component<{
+      ...$Exact<B>,
       ...$Exact<$ObjMap<$Call<Apply<
         $ComposeReverse,
         Mapper<F>,
-      >, (*)>, <V>(V) => V>>,
+      >, ({props: *})>, <V>(V) => V>>,
     }, void>>)
 })
 
