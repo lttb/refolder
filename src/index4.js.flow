@@ -1,14 +1,14 @@
 /* @flow */
 
-declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
-    & (([F1, F2, F3, F4, F5]) => $Call<Fn, F1, F2, F3, F4, F5>)
-    & (([F1, F2, F3, F4]) => $Call<Fn, F1, F2, F3, F4>)
-    & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
-    & (([F1, F2]) => $Call<Fn, F1, F2>)
-    & (([F1]) => $Call<Fn, F1>)
+declare function apply<Fn, Fs, F1, F2, F3, F4, F5, Sm>(Fn, Fs, Sm): $Call<(
+    & (([F1, F2, F3, F4, F5]) => $Call<Fn, Sm, F1, F2, F3, F4, F5>)
+    & (([F1, F2, F3, F4]) => $Call<Fn, Sm, F1, F2, F3, F4>)
+    & (([F1, F2, F3]) => $Call<Fn, Sm, F1, F2, F3>)
+    & (([F1, F2]) => $Call<Fn, Sm, F1, F2>)
+    & (([F1]) => $Call<Fn, Sm, F1>)
 ), Fs>
 
-type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
+type Apply<Fn, Fs, Sm> = $Call<typeof apply, Fn, Fs, Sm>
 
 function F1<T>(_) {
   return class heh<T> extends _<T> {
@@ -31,15 +31,42 @@ type HAH<F, B, T> = $Call<typeof F2, $Call<Apply<
   F,
 >, $Call<typeof F1, B, T>>, T>
 
-// declare function f<$, F>(...folders: F): ({
-//   [[call]]: (<T, B>(Base: B) => (
-//     $Call<Apply<
-//       $ComposeReverse,
-//       F,
-//     >, B>
-//   ))
-// })
+// const LOLKA = <X>(_: X) => class $0<T: {}, S> extends _<{|...$Exact<T>|}> {
+//   self: {...$Exact<S>}
+// }
 
-declare var f: $ComposeReverse
+declare class T_T<T: {}, S> extends _<{|...$Exact<T>|}> {
+  self: {...$Exact<S>}
+}
+
+function LOLKA(_) {
+  return class $0<T: {}, S> extends _<{...$Exact<T>}> {
+    props: {...$Exact<T>}
+    self: {...$Exact<S>}
+  }
+}
+
+
+const x = _ => _
+
+// declare function concat<A, B, X1, X2, X3, Y1, Y2, Y3, Y4, Y5>(A, B): $Call<(
+//     & (([F1, F2, F3, F4, F5]) => $Call<Fn, F1, F2, F3, F4, F5>)
+//     & (([F1, F2, F3, F4]) => $Call<Fn, F1, F2, F3, F4>)
+//     & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
+//     & (([F1, F2]) => $Call<Fn, F1, F2>)
+//     & (([F1]) => $Call<Fn, F1>)
+// ), A, B>
+
+declare function f<$, F>(...folders: F): ({
+  [[call]]: (<T, B>(Base: B) => (
+    $Call<Apply<
+      $ComposeReverse,
+      F,
+      typeof LOLKA,
+    >, B>
+  ))
+})
+
+// declare var f: $ComposeReverse
 
 export default f

@@ -1,10 +1,10 @@
 /* @flow */
 
-import React, {Component} from 'react'
+import React, {Component, type ComponentType} from 'react'
 
 import fold from './index4'
 
-class State extends Component<{state: {}, context: {}, children: Function}, {}> {
+class State extends Component<{state?: {}, context: {state: any, setState: Function}, children: Function}, {}> {
   state = this.props.state || {}
   setState = this.setState.bind(this)
   link = {
@@ -32,11 +32,8 @@ class State extends Component<{state: {}, context: {}, children: Function}, {}> 
 }
 
 const enhance = fold(
-  _ => class $0<T, S> extends _<T> {
-    self: {...$Exact<S>}
-  },
   _ =>
-    class $1<T, Self> extends _<{...T, x: 1}, Self & {lol: 'kek'}> {
+    class $1<T: {}, Self> extends _<{...$Exact<T>, x: 1}, Self & {lol: 'kek'}> {
       constructor(...args) {
         super(...args)
 
@@ -57,7 +54,10 @@ const enhance = fold(
     },
 
   _ =>
-    class $2<T> extends _<{...T, z: 2}, {|setState: Function|}> {
+    class $2<T: {}, Self = {}> extends _<
+      {...$Exact<T>, z: 2},
+      Self & {state: {}, setState: Function}
+    > {
       constructor(...args) {
         super(...args)
 
@@ -88,9 +88,9 @@ const enhance = fold(
     },
 )
 
-export default class App extends enhance(Component)<{a: 3}> {
+class App extends enhance(Component)<{a: 3}> {
   render() {
-    console.log('render', this.props, super.props)
+    console.log('render', this.props, super.props, super.self)
 
     return (
       <div>
@@ -100,3 +100,5 @@ export default class App extends enhance(Component)<{a: 3}> {
     )
   }
 }
+
+export default ((App: any): ComponentType<{aa: 1}>)
