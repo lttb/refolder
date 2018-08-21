@@ -1,0 +1,45 @@
+/* @flow */
+
+declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
+    & (([F1, F2, F3, F4, F5]) => $Call<Fn, F1, F2, F3, F4, F5>)
+    & (([F1, F2, F3, F4]) => $Call<Fn, F1, F2, F3, F4>)
+    & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
+    & (([F1, F2]) => $Call<Fn, F1, F2>)
+    & (([F1]) => $Call<Fn, F1>)
+), Fs>
+
+type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
+
+function F1<T>(_) {
+  return class heh<T> extends _<T> {
+    self: {x: 1}
+  }
+}
+
+class OH<T> {
+  props: T
+}
+
+type OOH = typeof OH
+
+declare function F3<T, A>(_: T, x: A): T
+
+declare function F2<B, T>(B, T): $Call<typeof F3, B, T>
+
+type HAH<F, B, T> = $Call<typeof F2, $Call<Apply<
+  $ComposeReverse,
+  F,
+>, $Call<typeof F1, B, T>>, T>
+
+// declare function f<$, F>(...folders: F): ({
+//   [[call]]: (<T, B>(Base: B) => (
+//     $Call<Apply<
+//       $ComposeReverse,
+//       F,
+//     >, B>
+//   ))
+// })
+
+declare var f: $ComposeReverse
+
+export default f

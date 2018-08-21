@@ -2,17 +2,25 @@
 
 import React, {Component} from 'react'
 
-import fold, {$React$Component} from './'
+import fold from './'
 
 const enhance = fold(
   _ => class extends _ {
-    props = lift => (props: {hoh: 'x'}) => lift({...props, a: 1, heh: props.hoh})
+    // lift = lift => props => lift({...props, a: 1, heh: props.hoh})
+
+    lift(lift) {
+      return lift({...this.props, a: 1})
+    }
+
+    static onClick() {
+      return 'heh'
+    }
   },
   _ => class extends _ {
     onClick() {
-      super.onClick();
+      _.onClick()
 
-      console.log('x')
+      console.log('x', this.toggle())
     }
 
     toggle() {
@@ -20,100 +28,26 @@ const enhance = fold(
     }
   },
   _ => class extends _ {
-    props = lift => props => lift({...props, c: 'hehe'})
+    shouldComponentUpdate() {
+      return this.props.x > 1
+    }
+
+    lift(lift) {
+      return lift({...this.props, c: 'hehe'})
+    }
+
+    static props = lift => props => lift({...props, c: 'hehe'})
   },
 )
 
-const enhance = fold(
-  {
-    props: lift => (props: {hoh: 'x'}) => lift({...props, a: 1, heh: props.hoh}),
-  },
-  ctx => ({
-    onClick: () => null,
-    props: lift => props => lift({...props, b: 'haha'}),
-  }),
-  ctx => ({
-    toggle: () => ctx.onClick(),
-    props: lift => props => lift({...props, c: 'hehe'}),
-  }),
-  {
-    click: () => console.log('click'),
-    props: lift => props => lift({...props, a: 1, heh: props.hoh}),
-  },
-)
-
-const enhance2 = fold(
-  {
-    props: lift => (props: {hoh: 'x'}) => lift({...props, a: 1, heh: props.hoh}),
-  },
-  ctx => ({
-    onClick: () => null,
-    props: lift => props => lift({...props, b: 'haha'}),
-  }),
-)
-
-class App extends enhance(Component) {
+export default class App extends enhance(class extends Component<{x: 1}> {}) {
   onKek = () => null
 
   render() {
-    this.$.click()
+    console.log(App.onClick())
+    console.log(this.onClick)
+    console.log(this.props)
 
     return <div />
   }
 }
-
-type $X<T> = $Diff<T, {}>
-
-declare var t: $Diff<App, {}>
-
-class App2 extends enhance<$X<App>>(App) {
-  render() {
-    this.$.onKek()
-
-    this.$.click()
-
-    return <div />
-  }
-}
-
-// class App extends enhance(Component) {
-//   of(fn) {
-//     return fn.bind(this.$)
-//   }
-// }
-
-// const of = <T>(C) => class extends C {
-//   of(fn) {
-//     declare var x: T
-//
-//     return fn.bind(x)
-//   }
-// }
-//
-// const X = enhance(Component)
-// const X2 = enhance2(Component)
-//
-// declare var x: $PropertyType<X, '$'>
-//
-// class App2 extends of<$PropertyType<X, '$'>>(X) {
-//   render = this.of(function () {
-//     console.log(this.props)
-//   })
-// }
-//
-// class App3 extends of<$PropertyType<X2, '$'>>(X2) {
-//   render = this.of(function () {
-//     console.log(this.props)
-//   })
-// }
-
-
-export default enhance.of(App)
-
-const Enhanced = enhance.of(App)
-
-const Test = () => (
-  <Enhanced lol="lol" />
-)
-
-const X = (props: {a: 1}) => <div />

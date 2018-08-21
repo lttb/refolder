@@ -1,30 +1,5 @@
 /* @flow */
 
-import React, {Component, PureComponent, type ElementProps, type Node} from 'react'
-
-
-export class $React$Component<T, State = {}> extends Component<$PropertyType<T, 'props'>, State> {
-  $: T;
-
-  // of(fn) {
-  //   return fn.bind(this.$)
-  // }
-}
-
-class Test<T: {C: ComponentType<*>}> extends Component<T> {
-  render() {
-    const {C, ...props} = this.props
-
-    return <C {...props} />
-  }
-}
-
-function rndr<T>(x: T) {
-  declare class L extends Test<T> {}
-
-  return <L {...x} />
-}
-
 declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
     & (([F1]) => $Call<Fn, F1>)
     & (([F1, F2]) => $Call<Fn, F1, F2>)
@@ -34,12 +9,6 @@ declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
 ), Fs>
 
 type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
-
-
-// type Mapper<F> = $TupleMap<F, <C, A, X, V: (
-//   | ({props: (A => Node) => (X) => Node})
-//   | ((string) => {props: (A => Node) => (X) => Node})
-// )>(V) => ((X) => A)>
 
 type Mapper<F> = $TupleMap<F, (
   & (<A, C, V: {props: (A => Node) => ($PropertyType<C, 'props'>) => Node}>(V) => ((C) => ({
@@ -56,15 +25,12 @@ type Mapper<F> = $TupleMap<F, (
 
 declare function f<$, F>(...folders: F): ({
   of: (any) => Class<React$Component<{lol: 'lol'}>>,
-  [[call]]: (<B>(Base: *) =>
-    Class<$React$Component<{
-      ...$Exact<B>,
-      ...$Exact<$ObjMap<$Call<Apply<
-        $ComposeReverse,
-        Mapper<F>,
-      >, ({props: *})>, <V>(V) => V>>,
-    }, void>>)
+  [[call]]: (<B>(Base: B) => (
+    $Call<Apply<
+      $ComposeReverse,
+      F,
+    >, B>
+  ))
 })
-
 
 export default f
