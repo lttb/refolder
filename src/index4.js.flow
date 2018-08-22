@@ -1,14 +1,14 @@
 /* @flow */
 
-declare function apply<Fn, Fs, F1, F2, F3, F4, F5, Sm>(Fn, Fs, Sm): $Call<(
-    & (([F1, F2, F3, F4, F5]) => $Call<Fn, Sm, F1, F2, F3, F4, F5>)
-    & (([F1, F2, F3, F4]) => $Call<Fn, Sm, F1, F2, F3, F4>)
-    & (([F1, F2, F3]) => $Call<Fn, Sm, F1, F2, F3>)
-    & (([F1, F2]) => $Call<Fn, Sm, F1, F2>)
-    & (([F1]) => $Call<Fn, Sm, F1>)
+declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
+    & (([F1, F2, F3, F4, F5]) => $Call<Fn, F1, F2, F3, F4, F5>)
+    & (([F1, F2, F3, F4]) => $Call<Fn, F1, F2, F3, F4>)
+    & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
+    & (([F1, F2]) => $Call<Fn, F1, F2>)
+    & (([F1]) => $Call<Fn, F1>)
 ), Fs>
 
-type Apply<Fn, Fs, Sm> = $Call<typeof apply, Fn, Fs, Sm>
+type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
 
 function F1<T>(_) {
   return class heh<T> extends _<T> {
@@ -40,8 +40,8 @@ declare class T_T<T: {}, S> extends _<{|...$Exact<T>|}> {
 }
 
 function LOLKA(_) {
-  return class $0<T: {}, S> extends _<{...$Exact<T>}> {
-    props: {...$Exact<T>}
+  return class $0<T: {}, S> extends _<{|...$Exact<T>|}> {
+    props: {|...$Exact<T>|}
     self: {...$Exact<S>}
   }
 }
@@ -57,13 +57,64 @@ const x = _ => _
 //     & (([F1]) => $Call<Fn, F1>)
 // ), A, B>
 
+function LOLKA2(_, P) {
+  return class $0<T = {}, S = {}> extends _<{|...$Exact<T>|}, S> {
+    props: {|...$Exact<T>|}
+  }
+}
+
+// type Mapper<F> = $TupleMap<F, (
+//   & (<C, L: $PropertyType<C, 'lift'>, P: $Call<<T>((T => any) => any) => T, L>>(C => any) => $Call<typeof LOLKA2, C, P>)
+//   & (<V>(V) => V)
+// )>
+
+// type Mapper<F> = $TupleMap<F, (
+//   & (<T, C, R, V: (C) => Class<R>, P1>(V) => ({class: C, props: P1}) => ({
+//     props: {...$Exact<P1>, ...$Exact<$Call<((T => any) => any) => T, $PropertyType<R, 'lift'>>>},
+//     class: Class<R>,
+//   }))
+// )>
+
+// type Mapper<F> = $TupleMap<F, (
+//   & (<C0, R0, C: Class<C0>, R: Class<R0>, V: (C) => R, P1>(V) => ({class: C, props: P1}) => ({
+//     props: P1,
+//     class: R,
+//   }))
+// )>
+
+declare function tt<T>(T): T
+
+type Mapper<F> = $TupleMap<F, (
+  & (<T, C0, R0, C: Class<C0>, R: Class<R0>, V: (C) => R, P1>(V) => ({class: C, props: P1}) => ({
+    props: {...$Exact<P1>, ...$Exact<$Call<((T => any) => any) => T, $PropertyType<R0, 'lift'>>>},
+    class: R & {props: {...$Exact<P1>, ...$Exact<$Call<((T => any) => any) => T, $PropertyType<R0, 'lift'>>>}},
+  }))
+  & (<V>(V) => V)
+)>
+
+
+// type Mapper<F> = $TupleMap<F, (
+//   & (<T, C0, R0, C: Class<C0>, R: Class<R0>, V: (C) => R, P1>(V) => $Call<((T => any) => any) => T, $PropertyType<C0, 'lift'>>)
+// )>
+
+// declare function f<$, F>(...folders: F): ({
+//   // test: $ElementType<Mapper<F>, 0>,
+//   [[call]]: (<T, B>(Base: B) => (
+//     $PropertyType<$Call<Apply<
+//       $ComposeReverse,
+//       // Mapper<F>,
+//       Mapper<F>,
+//     >, {class: $Call<typeof LOLKA, B>, props: {}}>, 'class'>
+//   ))
+// })
+
 declare function f<$, F>(...folders: F): ({
+  // test: $ElementType<Mapper<F>, 0>,
   [[call]]: (<T, B>(Base: B) => (
-    $Call<Apply<
-      $ComposeReverse,
-      F,
-      typeof LOLKA,
-    >, B>
+    $Call<
+      Apply<$ComposeReverse, F>,
+      $Call<typeof LOLKA, B>
+    >
   ))
 })
 

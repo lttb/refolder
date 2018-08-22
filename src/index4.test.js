@@ -31,9 +31,11 @@ class State extends Component<{state?: {}, context: {state: any, setState: Funct
   }
 }
 
+type Merge<A, B> = {...$Exact<A>, ...$Exact<B>}
+
 const enhance = fold(
   _ =>
-    class $1<T: {}, Self> extends _<{...$Exact<T>, x: 1}, Self & {lol: 'kek'}> {
+    class $1<Props: {}, Self> extends _<Merge<Props, {x: 1}> & Props, Self & {lol: 'kek'}> {
       constructor(...args) {
         super(...args)
 
@@ -54,8 +56,8 @@ const enhance = fold(
     },
 
   _ =>
-    class $2<T: {}, Self = {}> extends _<
-      {...$Exact<T>, z: 2},
+    class $2<Props: {}, Self = {}> extends _<
+      Merge<Props, {x: string, z: number}>,
       Self & {state: {}, setState: Function}
     > {
       constructor(...args) {
@@ -74,13 +76,20 @@ const enhance = fold(
         super.onClick()
       }
 
-      lift(lift) {
-        console.log('lift', 2, super.self)
+      lift(lift: (Props & {...Props, a: boolean, b: number}) => any) {
+        console.log('lift', 2, super.self, super.props.z)
 
         return (
-          <State context={super.self}>
+          <State context={super.self} state={{active: false}}>
             {({state}) => (
-              <div>{lift({...super.props, active: state.active, b: 2})}</div>
+              <div>{
+                lift({
+                  ...super.props,
+                  a: true,
+                  active: false,
+                  b: 2,
+                })}
+              </div>
             )}
           </State>
         )
@@ -88,7 +97,22 @@ const enhance = fold(
     },
 )
 
-class App extends enhance(Component)<{a: 3}> {
+class Test {
+  lift() {
+    return 'heh'
+  }
+}
+
+declare var ska: <F>(...F) => $TupleMap<F, <V>(Class<V>) => V>
+
+const tst = ska(Test)
+const tst2 = tst[0]
+
+tst2.lift
+
+console.log(enhance.test)
+
+class App extends enhance(Component)<{|a: 3, x: string|}> {
   render() {
     console.log('render', this.props, super.props, super.self)
 
