@@ -33,9 +33,15 @@ class State extends Component<{state?: {}, context: {state: any, setState: Funct
 
 type Merge<A, B> = {...$Exact<A>, ...$Exact<B>}
 
+class Test<P> extends Component<P> {}
+
+type Guard<T> = Class<Component<T>>
+
 const enhance = fold(
-  _ =>
-    class $1<Props: {}, Self> extends _<Merge<Props, {x: 1}> & Props, Self & {lol: 'kek'}> {
+  (_) => {
+    (_: Guard<$Subtype<{a: number}>>)
+
+    return class extends _ {
       constructor(...args) {
         super(...args)
 
@@ -53,13 +59,13 @@ const enhance = fold(
 
         return lift({...super.props, a: 1})
       }
-    },
+    }
+  },
 
-  _ =>
-    class $2<Props: {}, Self = {}> extends _<
-      Merge<Props, {x: string, z: number}>,
-      Self & {state: {}, setState: Function}
-    > {
+  (_) => {
+    (_: Guard<$Subtype<{x: string, z: string}>>)
+
+    return class extends _ {
       constructor(...args) {
         super(...args)
 
@@ -77,7 +83,7 @@ const enhance = fold(
       }
 
       lift(lift: (Props & {...Props, a: boolean, b: number}) => any) {
-        console.log('lift', 2, super.self, super.props.z)
+        console.log('lift', 2, super.self, super.props.a)
 
         return (
           <State context={super.self} state={{active: false}}>
@@ -94,7 +100,8 @@ const enhance = fold(
           </State>
         )
       }
-    },
+    }
+  },
 )
 
 class Test {
@@ -112,7 +119,7 @@ tst2.lift
 
 console.log(enhance.test)
 
-class App extends enhance(Component)<{|a: 3, x: string|}> {
+class App extends enhance(class extends Component<{x: string, a: number, z: string}> {}) {
   render() {
     console.log('render', this.props, super.props, super.self)
 

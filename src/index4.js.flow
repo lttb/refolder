@@ -113,7 +113,8 @@ declare function f<$, F>(...folders: F): ({
   [[call]]: (<T, B>(Base: B) => (
     $Call<
       Apply<$ComposeReverse, F>,
-      $Call<typeof LOLKA, B>
+      B,
+      // $Call<typeof LOLKA, B>
     >
   ))
 })
