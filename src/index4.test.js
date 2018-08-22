@@ -4,7 +4,7 @@ import React, {Component, type ComponentType} from 'react'
 
 import fold from './index4'
 
-class State extends Component<{state?: {}, context: {state: any, setState: Function}, children: Function}, {}> {
+class State extends Component<{state?: {}, context?: {state: any, setState: Function}, children: Function}, {}> {
   state = this.props.state || {}
   setState = this.setState.bind(this)
   link = {
@@ -31,7 +31,7 @@ class State extends Component<{state?: {}, context: {state: any, setState: Funct
   }
 }
 
-type Merge<A, B> = {...$Exact<A>, ...$Exact<B>}
+type Merge<A, B> = $ObjMap<{...$Exact<A>, ...$Exact<B>}, <V>(V) => V>
 
 class Test<P> extends Component<P> {}
 
@@ -39,9 +39,12 @@ type Guard<T> = Class<Component<T>>
 
 const enhance = fold(
   (_) => {
-    (_: Guard<$Subtype<{a: number}>>)
+    // ;(class extends _<Base> {}: Guard<$Subtype<{x: string, z: string}>>)
 
-    return class extends _ {
+    type Base = {a1: number}
+    type Enhance = {wow: boolean}
+
+    return class $<T: {}> extends _<{...$Exact<T>}> {
       constructor(...args) {
         super(...args)
 
@@ -57,15 +60,18 @@ const enhance = fold(
       lift(lift) {
         console.log('lift', 1, super.props)
 
-        return lift({...super.props, a: 1})
+        return lift({...super.props, a1: 1})
       }
     }
   },
 
   (_) => {
-    (_: Guard<$Subtype<{x: string, z: string}>>)
+    // ;(class extends _<Base> {}: Guard<$Subtype<{x: string, z: string}>>)
 
-    return class extends _ {
+    type Base = {a2: string}
+    type Enhance = {x: string, y: string}
+
+    return class $<T: {}> extends _<{...$Exact<T>}> {
       constructor(...args) {
         super(...args)
 
@@ -82,18 +88,16 @@ const enhance = fold(
         super.onClick()
       }
 
-      lift(lift: (Props & {...Props, a: boolean, b: number}) => any) {
-        console.log('lift', 2, super.self, super.props.a)
+      lift(lift) {
+        console.log('lift', 2, super.props.a)
 
         return (
-          <State context={super.self} state={{active: false}}>
+          <State state={{active: false}}>
             {({state}) => (
               <div>{
                 lift({
                   ...super.props,
-                  a: true,
-                  active: false,
-                  b: 2,
+                  a2: 'test',
                 })}
               </div>
             )}
@@ -104,24 +108,10 @@ const enhance = fold(
   },
 )
 
-class Test {
-  lift() {
-    return 'heh'
-  }
-}
 
-declare var ska: <F>(...F) => $TupleMap<F, <V>(Class<V>) => V>
-
-const tst = ska(Test)
-const tst2 = tst[0]
-
-tst2.lift
-
-console.log(enhance.test)
-
-class App extends enhance(class extends Component<{x: string, a: number, z: string}> {}) {
+class App extends enhance(Component)<{z: 1}> {
   render() {
-    console.log('render', this.props, super.props, super.self)
+    console.log('render', this.props, super.props)
 
     return (
       <div>
