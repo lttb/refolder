@@ -2,69 +2,15 @@
 
 import React, {Component, type ComponentType, type Node} from 'react'
 
-import fold from './index4'
+import fold from './index4.js.flow'
 
-class State extends Component<{state?: {}, context?: {state: any, setState: Function}, children: Function}, {}> {
-  state = this.props.state || {}
-  setState = this.setState.bind(this)
-  link = {
-    state: this.state,
-    setState: this.setState,
-  }
-
-  constructor(...args) {
-    super(...args)
-
-    if (this.props.context) this.initState(this.props.context)
-  }
-
-  initState(self) {
-    self.state = this.state
-    self.setState = this.setState
-  }
-
-  render() {
-    return this.props.children({
-      state: this.state,
-      setState: this.setState,
-    })
-  }
-}
-
-type Merge<A, B> = $ObjMap<{...$Exact<A>, ...$Exact<B>}, <V>(V) => V>
-
-class Test<P> extends Component<any> {
-  $props: P
-}
-
-type Guard<T> = Class<Test<T>>
-
-// const cast = <X>(_: Class<X>) => class $<T> extends (class extends _ {props: any}) {props: T}
-
-const c = <X: *>(_: Class<X>) => class extends _ {props: any}
-
-function cast(_) {
-  return class $<T> extends (class extends _ {props: any}) {
-    props: T
-  }
-}
-
-class X { props: any }
-
-// const x = <T: *>(_: Class<T>): Class<$Supertype<X> & $Supertype<T>> => class extends _ {prop: any}
-// const y = <T: *>(_: Class<T>) => class $<A> extends _ {props: A}
-//
-// declare function xx<T: *, C: Class<T>>(_: C): $Call<$Call<$Compose, typeof y, typeof x>, C>
-
-
-class Y<T> extends Component<T> {}
-
-const xx = <T: *>(_: Class<T>): (Class<$Supertype<X & T>>) => class extends _ {prop: any}
-const yy = <T: *>(_: Class<T>): $Supertype<T & typeof Y> => class $<A> extends _ {props: A}
-
-declare function xxx<T: *, C: Class<T>>(_: C): $Call<$Call<$Compose, typeof yy, typeof xx>, C>
-
-// const xx = <T: *>(_: Class<T>) => class $<A> extends x(_) {props: A}
+declare function _assert<B, A: B>(): void
+declare function assert<A, B>(): (
+  $Call<_assert<
+    $Diff<{...$Exact<A>}, $Diff<{...$Exact<A>, ...$Exact<B>}, {...$Exact<B>}>>,
+    {...$Exact<B>}
+  >>
+)
 
 declare class O<Enhance, Base, S = any> {
   props: {|...Enhance|};
@@ -73,23 +19,6 @@ declare class O<Enhance, Base, S = any> {
   static lift: ({|...Base|}) => Node;
 }
 
-declare function _assert<B, A: B>(): void
-type _ass = typeof _assert
-
-declare function assert<A, B>(): (
-  $Call<_assert<$Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>, B>>
-)
-
-// function assert<A: *, B: *>() {
-//   declare var x: B
-//
-//   ;(x: $Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>)
-// }
-
-// declare function assert<A, B>(): $Call<
-//   & <X: A>() => null
-// , $Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>>
-
 const of = <T: *, Enhance, Base>(
   _: Class<T>,
 ): $Supertype<
@@ -97,34 +26,48 @@ const of = <T: *, Enhance, Base>(
   & T
 >> => class extends _ {props: any; $props: any; static lift: any}
 
-// const _of = (<T: *>() => <P>(_: Class<*>) => of<P, *>(_))()
+/* eslint-disable no-redeclare */
 
-
-function ass<A: *, B: *>() {
-  return assert<A, B>()
-}
-
-// type p<T: *> = {...$Exact<$PropertyType<T, '$props'>>}
-declare function p<T>(T): {...$PropertyType<T, '$props'>}
+declare function p<T>(T): {|...$PropertyType<T, '$props'>|}
+declare function p<T>(T): {}
 
 type _p<T> = $Call<typeof p, T>
 
-declare function assert2<T, B, A: $Call<typeof p, T>>(): (
-  $Call<_assert<$Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>, B>>
-)
+type $Props<T> = $Call<typeof p, T>
+
+// const merge = <A: {}, B: {}>(a: A, b: B): {|...$Exact<A>, ...$Exact<B>|} =>
+
+declare function merge<A: {}, B: {}>(A, B): {|
+  ...$Exact<A>,
+  ...$Exact<B>
+|}
+declare function merge<A: {}, B: {}, C: {}>(A, B, C): {|
+  ...$Exact<A>,
+  ...$Exact<B>,
+  ...$Exact<C>
+|}
+declare function merge<A: {}, B: {}, C: {}, D: {}>(A, B, C, D): {|
+  ...$Exact<A>,
+  ...$Exact<B>,
+  ...$Exact<C>,
+  ...$Exact<D>
+|}
+
+function merge(...args) {
+  return args.reduce((acc, value) => Object.assign(acc, value), {})
+}
 
 const enhance = fold(
   (_) => {
-    // ;(class extends _<Base> {}: Guard<$Subtype<{x: string, z: string}>>)
+    type Props = $Props<_>
+    type From = {|wow: boolean|}
+    type To = {|a1: number, a3: number|}
 
-    type From = {wow: boolean}
-    type To = {a1: number, a3: number}
+    (assert<Props, From>())
 
     return class $ extends of<*, From, To>(_) {
       constructor(...args) {
         super(...args)
-
-        console.log(super.self)
 
         console.log('init', 1, this.props, super.props)
       }
@@ -134,7 +77,7 @@ const enhance = fold(
       }
 
       lift() {
-        console.log('lift', 1, super.props)
+        console.log(this)
 
         return $.lift({a1: 1, a3: 2})
       }
@@ -142,20 +85,11 @@ const enhance = fold(
   },
 
   (_) => {
-    type From = {a1: string, y: string}
-    type To = {a2: string}
+    type Props = $Props<_>
+    type From = {|...Props, a1: number, y: string|}
+    type To = {|...From, a2: string, y: number|}
 
-    // assert<{...$PropertyType<_, '$props'>}, From>()
-
-    declare var x: _p<_>
-
-    console.log(x)
-
-    assert<_p<_>, From>()
-    // assert2<_, From, *>()
-
-
-    // (ass<_, From>())
+    (assert<Props, From>())
 
     return class $ extends of<*, From, To>(_) {
       constructor(...args) {
@@ -165,49 +99,37 @@ const enhance = fold(
       }
 
       onClick(): void {
-        console.log('click', 2, super.props, super.props.x)
-
-        super.self.setState(state => ({
-          active: !state.active,
-        }))
-
         super.onClick()
       }
 
-      lol() {
-        console.log(super.props)
-
-        return 'string'
-      }
-
       lift() {
-        console.log('lift', 2, super.props.a)
-
-        return (
-          <State state={{active: false}}>
-            {({state}) => (
-              <div>{
-                $.lift({
-                  a2: 'test',
-                })}
-              </div>
-            )}
-          </State>
-        )
+        return $.lift(merge(super.props, {a2: 'test', y: 1}))
       }
     }
   },
 
   (_) => {
-    return class $ extends of<*, {z: number}, {a3: string}>(_) {
+    type Props = $Props<_>
+    type From = {|a2: string, y: number|}
+    type To = {|a2: string|}
+
+    (assert<Props, From>())
+
+    return class $ extends of<*, From, To>(_) {
       constructor(...args) {
         super(...args)
 
-        console.log(super.onClick, super.lift)
+        console.log('init', 2, this.props, super.props)
+      }
 
-        console.log('init', 1, super.$props, super.props, super.lol)
+      onClick(): void {
+        super.onClick()
+      }
 
-        $.lift({a3: 'z'})
+      lift() {
+        console.log(this)
+
+        return $.lift({a2: 'test'})
       }
     }
   },

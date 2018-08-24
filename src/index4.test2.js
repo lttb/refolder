@@ -5,5 +5,5 @@ import React from 'react'
 import App from './index4.test'
 
 const Test = () => (
-  <App />
+  <App aa={1} />
 )
