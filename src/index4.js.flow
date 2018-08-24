@@ -1,14 +1,16 @@
 /* @flow */
 
-declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
-    & (([F1, F2, F3, F4, F5]) => $Call<Fn, F1, F2, F3, F4, F5>)
-    & (([F1, F2, F3, F4]) => $Call<Fn, F1, F2, F3, F4>)
-    & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
-    & (([F1, F2]) => $Call<Fn, F1, F2>)
-    & (([F1]) => $Call<Fn, F1>)
-), Fs>
+import {Component} from 'react'
 
-type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
+// declare function apply<Fn, Fs, F1, F2, F3, F4, F5>(Fn, Fs): $Call<(
+//     & (([F1, F2, F3, F4, F5]) => $Call<Fn, F1, F2, F3, F4, F5>)
+//     & (([F1, F2, F3, F4]) => $Call<Fn, F1, F2, F3, F4>)
+//     & (([F1, F2, F3]) => $Call<Fn, F1, F2, F3>)
+//     & (([F1, F2]) => $Call<Fn, F1, F2>)
+//     & (([F1]) => $Call<Fn, F1>)
+// ), Fs>
+//
+// type Apply<Fn, Fs> = $Call<typeof apply, Fn, Fs>
 
 function F1<T>(_) {
   return class heh<T> extends _<T> {
@@ -108,16 +110,136 @@ type Mapper<F> = $TupleMap<F, (
 //   ))
 // })
 
-declare function f<$, F>(...folders: F): ({
-  // test: $ElementType<Mapper<F>, 0>,
-  [[call]]: (<T, B>(Base: B) => (
-    $Call<
-      Apply<$ComposeReverse, F>,
-      B,
-      // $Call<typeof LOLKA, B>
-    >
+const init = _ => class $<T> extends (class extends _<any> {}) {props: T}
+
+function LOLKACast(_) {
+  return class $0<T = {}, S = {}> extends _<{|...$Exact<T>|}, S> {
+    props: any
+  }
+}
+
+// type Caster<F> = $Call<
+//   Apply<
+//     $Compose,
+//     $TupleMap<F, <A, R, V: A => R>(V) => (A => R)>
+//   >
+// >
+
+const cast = _ => class $<T> extends (class extends _ {props: any}) {props: T}
+
+type _Cast = typeof cast
+
+class Kek<T> extends Component<T> {}
+
+class X<P, S = any> { props: P; self: S }
+class Y<T> { props: T}
+
+const xx = <T: *, P>(_: Class<T>): $Supertype<Class<X<P> & T>> => class extends _ {prop: any}
+// const yy = (_) => class $<A> extends _ {props: A}
+const yy = <T: *, P>(_: Class<T>) => class $<A: P> extends _ {props: A}
+
+declare function xxx<T: *, C: Class<T>>(_: C): $Call<$Call<$Compose, typeof yy, typeof xx>, C>
+
+type Caster<F> = $TupleMap<F, (
+  & (<A, R, V: A => R, X: $Call<typeof cast, A>>(V) => (
+    // & (A => null)
+    // & (A => R)
+    // & ($Call<$Compose, V, typeof xx>)
+    V
   ))
-})
+)>
+
+const kk = _ => class extends _<any> {}
+
+declare function $$<A, R>(A => R): (
+  <X>(X) => ($Call<$Call<$Compose, typeof xx, (A => R)>, X>)
+)
+type _$$<T> = $Call<typeof $$, T>
+
+// declare function f<$, F>(...folders: F): ({
+//   // test: $ElementType<Mapper<F>, 0>,
+//   [[call]]: (<T, B>(Base: B) => (
+//     $Call<
+//       Apply<$ComposeReverse, F>,
+//       B,
+//       // $Call<typeof xx, B>,
+//       // $Call<typeof LOLKA, B>
+//     >
+//   ))
+// })
+
+class O<Enhance, Base, S = any> {
+  props: {|...Enhance|};
+  self: S;
+  $props: {|...Base|};
+}
+
+const of = <T: *>(_: Class<T>): $Supertype<
+  Class<O<$PropertyType<T, 'props'>, $PropertyType<T, '$props'>>
+  & T
+>> => class extends _ {props: any; $props: any}
+
+type _of = typeof of
+
+declare function $$$<A, R>(A => R): (
+  <X>(X) => (
+    $Call<$Call<$Compose, _of, (A => R)>, X>
+  )
+)
+
+type _$$$<T> = $Call<typeof $$$, T>
+
+/* eslint-disable no-redeclare */
+
+declare function f<$, A1>(A1): (<B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1>, B>
+))
+declare function f<$, A1, A2>(A1, A2): (<B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1, A2>, B>
+))
+declare function f<$, A1, A2, A3>(A1, A2, A3): (<B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1, A2, A3>, B>
+))
+declare function f<$, A1, A2, A3, A4>(A1, A2, A3, A4): (<B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1, A2, A3, A4>, B>
+))
+declare function f<$, A1, A2, A3, A4, A5>(A1, A2, A3, A4, A5): (<B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1, A2, A3, A4, A5>, B>
+))
+
+// declare function apply<Fn, A1, A2, A3>(Fn, [A1, A2, A3]): $Call<Fn, A1, A2, A3>
+// declare function apply<Fn, A1, A2>(Fn, [A1, A2]): $Call<Fn, A1, A2>
+
+// type apply = (
+//   & <Fn, A1, A2, A3>([A1, A2, A3]) => $Call<$ComposeReverse, A1, A2, A3>
+//   & <Fn, A1, A2>([A1, A2]) => $Call<$ComposeReverse, A1, A2>
+//   & <Fn, A1>([A1]) => $Call<$ComposeReverse, A1>
+// )
+
+
+
+// declare function apply<B, A1, A2, A3>(
+//   [A1, A2, A3]
+// ): $Call<$Call<$ComposeReverse, A1, A2, A3>, B>
+// declare function apply<B, A1, A2, A3, A4>(
+//   [A1, A2, A3, A4]
+// ): $Call<$Call<$ComposeReverse, A1, A2, A3, A4>, B>
+// declare function apply<B, A1, A2, A3, A4, A5>(
+//   [A1, A2, A3, A4, A5]
+// ): $Call<$Call<$ComposeReverse, A1, A2, A3, A4, A5>, B>
+//
+// // declare function apply<B, A1, A2>(
+// //   [A1, A2]
+// // ): $Call<$Call<$ComposeReverse, A1, A2>, B>
+// // declare function apply<B, A1>(
+// //   [A1]
+// // ): $Call<$Call<$ComposeReverse, A1>, B>
+//
+// declare function f<$, F>(...folders: F): ({
+//   [[call]]: (<T, B>(Base: B) => (
+//     $Call<typeof apply, $TupleMap<F, <V>(V) => V>, B>
+//   ))
+// })
 
 // declare var f: $ComposeReverse
 
