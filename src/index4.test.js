@@ -1,6 +1,6 @@
 /* @flow */
 
-import React, {Component, type ComponentType} from 'react'
+import React, {Component, type ComponentType, type Node} from 'react'
 
 import fold from './index4'
 
@@ -66,7 +66,7 @@ declare function xxx<T: *, C: Class<T>>(_: C): $Call<$Call<$Compose, typeof yy, 
 
 // const xx = <T: *>(_: Class<T>) => class $<A> extends x(_) {props: A}
 
-class O<Enhance, Base, S = any> {
+declare class O<Enhance, Base, S = any> {
   props: {|...Enhance|};
   self: S;
   $props: {|...Base|};
@@ -77,7 +77,7 @@ const of = <T: *, Enhance, Base>(
 ): $Supertype<
   & Class<O<$Exact<Enhance>, $Exact<Base>>
   & T
->> => class extends _ {props: any; $props: any}
+>> => class extends _ {props: any; $props: any;}
 
 // const _of = (<T: *>() => <P>(_: Class<*>) => of<P, *>(_))()
 
@@ -110,17 +110,18 @@ const enhance = fold(
   },
 
   (_) => {
+    type Base = {a2: string}
+    type Enhance = {...$PropertyType<_, '$props'>, a1: string, y: string}
 
-    type Base = {|a2: string|}
-    type Enhance = {|...$PropertyType<_, '$props'>, a1: string, y: string|}
-
-    declare var x: $Subtype<$PropertyType<_, '$props'>>
-    declare var z: $Subtype<$PropertyType<_, 'props'>>
+    declare var x: {...$PropertyType<_, '$props'>}
+    declare var z: $PropertyType<_, 'props'>
     declare var y: Enhance
 
     // ;(class extends _ {}: Guard<$Subtype<Enhance>>)
 
     // ;(y: $Supertype<$PropertyType<_, '$props'>>)
+
+    ;(y: {...$PropertyType<_, '$props'>})
 
     return class $2 extends of<*, Enhance, Base>(_) {
       constructor(...args) {
@@ -153,7 +154,6 @@ const enhance = fold(
             {({state}) => (
               <div>{
                 lift({
-                  ...super.props,
                   a2: 'test',
                 })}
               </div>
