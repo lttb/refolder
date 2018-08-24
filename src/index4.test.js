@@ -100,6 +100,19 @@ const of = <T: *, Enhance, Base>(
 // const _of = (<T: *>() => <P>(_: Class<*>) => of<P, *>(_))()
 
 
+function ass<A: *, B: *>() {
+  return assert<A, B>()
+}
+
+// type p<T: *> = {...$Exact<$PropertyType<T, '$props'>>}
+declare function p<T>(T): {...$PropertyType<T, '$props'>}
+
+type _p<T> = $Call<typeof p, T>
+
+declare function assert2<T, B, A: $Call<typeof p, T>>(): (
+  $Call<_assert<$Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>, B>>
+)
+
 const enhance = fold(
   (_) => {
     // ;(class extends _<Base> {}: Guard<$Subtype<{x: string, z: string}>>)
@@ -129,10 +142,20 @@ const enhance = fold(
   },
 
   (_) => {
-    type From = {a1: number, y: string}
+    type From = {a1: string, y: string}
     type To = {a2: string}
 
-    assert<{...$PropertyType<_, '$props'>}, From>()
+    // assert<{...$PropertyType<_, '$props'>}, From>()
+
+    declare var x: _p<_>
+
+    console.log(x)
+
+    assert<_p<_>, From>()
+    // assert2<_, From, *>()
+
+
+    // (ass<_, From>())
 
     return class $ extends of<*, From, To>(_) {
       constructor(...args) {
