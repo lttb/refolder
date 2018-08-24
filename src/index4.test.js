@@ -73,11 +73,22 @@ declare class O<Enhance, Base, S = any> {
   static lift: ({|...Base|}) => Node;
 }
 
-function assert<B, A: B>() {
-  declare var x: A
+declare function _assert<B, A: B>(): void
+type _ass = typeof _assert
 
-  ;(x: B)
-}
+declare function assert<A, B>(): (
+  $Call<_assert<$Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>, B>>
+)
+
+// function assert<A: *, B: *>() {
+//   declare var x: B
+//
+//   ;(x: $Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>)
+// }
+
+// declare function assert<A, B>(): $Call<
+//   & <X: A>() => null
+// , $Diff<A, $Diff<{...$Exact<A>, ...$Exact<B>}, B>>>
 
 const of = <T: *, Enhance, Base>(
   _: Class<T>,
@@ -93,10 +104,10 @@ const enhance = fold(
   (_) => {
     // ;(class extends _<Base> {}: Guard<$Subtype<{x: string, z: string}>>)
 
-    type Base = {a1: number}
-    type Enhance = {wow: boolean}
+    type From = {wow: boolean}
+    type To = {a1: number, a3: number}
 
-    return class $ extends of<*, Enhance, Base>(_) {
+    return class $ extends of<*, From, To>(_) {
       constructor(...args) {
         super(...args)
 
@@ -112,28 +123,18 @@ const enhance = fold(
       lift() {
         console.log('lift', 1, super.props)
 
-        return $.lift({a1: 1})
+        return $.lift({a1: 1, a3: 2})
       }
     }
   },
 
   (_) => {
-    type Base = {a2: string}
-    type Enhance = {...$PropertyType<_, '$props'>, a1: string, y: string}
+    type From = {a1: number, y: string}
+    type To = {a2: string}
 
-    declare var x: {...$PropertyType<_, '$props'>}
-    declare var z: $PropertyType<_, 'props'>
-    declare var y: Enhance
+    assert<{...$PropertyType<_, '$props'>}, From>()
 
-    // ;(class extends _ {}: Guard<$Subtype<Enhance>>)
-
-    // ;(y: $Supertype<$PropertyType<_, '$props'>>)
-
-    // ;(y: {...$PropertyType<_, '$props'>})
-
-    // assert<{...$PropertyType<_, '$props'>}, Enhance>()
-
-    return class $ extends of<*, Enhance, Base>(_) {
+    return class $ extends of<*, From, To>(_) {
       constructor(...args) {
         super(...args)
 
