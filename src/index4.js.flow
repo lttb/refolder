@@ -2,14 +2,47 @@
 
 /* eslint-disable no-redeclare */
 
+declare function p<T>(T): {|...$PropertyType<T, '$props'>|}
+declare function p<T>(T): {}
+
+type $Props<T> = $Call<typeof p, T>
+
+declare class O<Enhance, Base, S = any> {
+  props: {|...Enhance|};
+  self: S;
+  $props: {|...Base|};
+  static lift: ({|...Base|}) => Node;
+}
+
+const of = <T: *, Enhance, Base>(
+  _: Class<T>,
+): $Supertype<
+  & Class<O<$Exact<Enhance>, $Exact<Base>> & T>
+> => class extends _ {props: any; $props: any; static lift: any}
+
+
+// function finalize(_) {
+//   type Props = $Props<_>
+//
+//   return class extends of<*, Props, Props>(_) {}
+// }
+
+declare export function finalize<T>(_: Class<T>): $Supertype<
+  & Class<O<$Props<T>, $Props<T>> & T>
+>
+
 declare function f<$, A1>(A1): (<B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1>, B>
 ))
 declare function f<$, A1, A2>(A1, A2): (<B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1, A2>, B>
 ))
-declare function f<$, A1, A2, A3>(A1, A2, A3): (<B>(Base: B) => (
-  $Call<$Call<$ComposeReverse, A1, A2, A3>, B>
+declare function f<$, A1, A2, A3>(A1, A2, A3): (<T, B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1, A2, A3, (
+    (_: Class<T>) => $Supertype<
+      & Class<O<$Props<T>, $Props<T>> & T>
+    >
+  )>, B>
 ))
 declare function f<$, A1, A2, A3, A4>(A1, A2, A3, A4): (<B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1, A2, A3, A4>, B>
