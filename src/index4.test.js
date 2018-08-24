@@ -70,16 +70,24 @@ declare class O<Enhance, Base, S = any> {
   props: {|...Enhance|};
   self: S;
   $props: {|...Base|};
+  static lift: ({|...Base|}) => Node;
+}
+
+function assert<B, A: B>() {
+  declare var x: A
+
+  ;(x: B)
 }
 
 const of = <T: *, Enhance, Base>(
-  _: Class<T>
+  _: Class<T>,
 ): $Supertype<
   & Class<O<$Exact<Enhance>, $Exact<Base>>
   & T
->> => class extends _ {props: any; $props: any;}
+>> => class extends _ {props: any; $props: any; static lift: any}
 
 // const _of = (<T: *>() => <P>(_: Class<*>) => of<P, *>(_))()
+
 
 const enhance = fold(
   (_) => {
@@ -88,7 +96,7 @@ const enhance = fold(
     type Base = {a1: number}
     type Enhance = {wow: boolean}
 
-    return class $1 extends of<*, Enhance, Base>(_) {
+    return class $ extends of<*, Enhance, Base>(_) {
       constructor(...args) {
         super(...args)
 
@@ -101,10 +109,10 @@ const enhance = fold(
         console.log('click', 1, super.props)
       }
 
-      lift(lift) {
+      lift() {
         console.log('lift', 1, super.props)
 
-        return lift({...super.props, a1: 1})
+        return $.lift({a1: 1})
       }
     }
   },
@@ -121,9 +129,11 @@ const enhance = fold(
 
     // ;(y: $Supertype<$PropertyType<_, '$props'>>)
 
-    ;(y: {...$PropertyType<_, '$props'>})
+    // ;(y: {...$PropertyType<_, '$props'>})
 
-    return class $2 extends of<*, Enhance, Base>(_) {
+    // assert<{...$PropertyType<_, '$props'>}, Enhance>()
+
+    return class $ extends of<*, Enhance, Base>(_) {
       constructor(...args) {
         super(...args)
 
@@ -146,14 +156,14 @@ const enhance = fold(
         return 'string'
       }
 
-      lift(lift) {
+      lift() {
         console.log('lift', 2, super.props.a)
 
         return (
           <State state={{active: false}}>
             {({state}) => (
               <div>{
-                lift({
+                $.lift({
                   a2: 'test',
                 })}
               </div>
@@ -165,16 +175,15 @@ const enhance = fold(
   },
 
   (_) => {
-    type Base = {a3: string}
-    type Enhance = {z: number}
-
-    return class $3 extends of<*, Enhance, Base>(_) {
+    return class $ extends of<*, {z: number}, {a3: string}>(_) {
       constructor(...args) {
         super(...args)
 
-        console.log(super.onClick)
+        console.log(super.onClick, super.lift)
 
         console.log('init', 1, super.$props, super.props, super.lol)
+
+        $.lift({a3: 'z'})
       }
     }
   },
