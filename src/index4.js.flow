@@ -20,6 +20,7 @@ const of = <T: *, Enhance, Base>(
   & Class<O<$Exact<Enhance>, $Exact<Base>> & T>
 > => class extends _ {props: any; $props: any; static lift: any}
 
+const init = _ => class extends _<any> {}
 
 // function finalize(_) {
 //   type Props = $Props<_>
@@ -37,12 +38,10 @@ declare function f<$, A1>(A1): (<B>(Base: B) => (
 declare function f<$, A1, A2>(A1, A2): (<B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1, A2>, B>
 ))
-declare function f<$, A1, A2, A3>(A1, A2, A3): (<T, B>(Base: B) => (
-  $Call<$Call<$ComposeReverse, A1, A2, A3, (
-    (_: Class<T>) => $Supertype<
-      & Class<O<$Props<T>, $Props<T>> & T>
-    >
-  )>, B>
+declare function f<$, A1, A2, A3>(A1, A2, A3): (<P, T, B>(Base: B, P) => (
+  $Call<$Call<$ComposeReverse, typeof init, A1, A2, A3, (
+    (_: Class<T>) => Class<O<$Props<T>, $Props<T>> & T>
+  ), P>, B>
 ))
 declare function f<$, A1, A2, A3, A4>(A1, A2, A3, A4): (<B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1, A2, A3, A4>, B>

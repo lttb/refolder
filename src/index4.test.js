@@ -111,7 +111,7 @@ const enhance = fold(
   (_) => {
     type Props = $Props<_>
     type From = {|a2: string, y: number|}
-    type To = {|...From, a3: number|}
+    type To = {|...From, a3: number, x: string|}
 
     (assert<Props, From>())
 
@@ -129,14 +129,21 @@ const enhance = fold(
       lift() {
         console.log(this)
 
-        return $.lift(merge(super.props, {a3: 2}))
+        return $.lift(merge(super.props, {a3: 2, x: 'x'}))
       }
     }
   },
 )
 
 
-class App extends enhance(class extends Component<{a: 1}> {}) {
+class App extends enhance(Component, (_) => {
+  type _Props = $Props<_>
+  type Props = {..._Props, x: string}
+
+  (assert<_Props, Props>())
+
+  return class extends of<*, Props, Props>(_) {}
+}) {
   render() {
     console.log('render', this.props, super.props)
 
@@ -148,97 +155,110 @@ class App extends enhance(class extends Component<{a: 1}> {}) {
     )
   }
 }
+
+// class App extends enhance<{x: 1}, *, *>(Component) {
+//   render() {
+//     console.log('render', this.props, super.props)
+//
+//     return (
+//       <div>
+//         <button onClick={this.onClick}>click</button>
+//         <p>props: {JSON.stringify(super.props, null, 4)}</p>
+//       </div>
+//     )
+//   }
+// }
 
 export default ((App: any): ComponentType<{aa: 1}>)
 
-
-const enhance2 = fold(
-  (_) => {
-    type Props = $Props<_>
-    type From = {|wow2: boolean|}
-    type To = {|a12: number, a32: number|}
-
-    (assert<Props, From>())
-
-    return class $ extends of<*, From, To>(_) {
-      constructor(...args) {
-        super(...args)
-
-        console.log('init', 1, this.props, super.props)
-      }
-
-      onClick(): void {
-        console.log('click', 1, super.props)
-      }
-
-      lift() {
-        console.log(this)
-
-        return $.lift({a12: 1, a32: 2})
-      }
-    }
-  },
-
-  (_) => {
-    type Props = $Props<_>
-    type From = {|...Props, a1: number, y: string|}
-    type To = {|...From, a2: boolean, y: number|}
-
-    (assert<Props, From>())
-
-    return class $ extends of<*, From, To>(_) {
-      constructor(...args) {
-        super(...args)
-
-        console.log('init', 2, this.props, super.props)
-      }
-
-      onClick(): void {
-        super.onClick()
-      }
-
-      lift() {
-        return $.lift(merge(super.props, {a2: true, y: 1}))
-      }
-    }
-  },
-
-  (_) => {
-    type Props = $Props<_>
-    type From = {|a2: boolean, y: number|}
-    type To = {|...From, a22: string|}
-
-    (assert<Props, From>())
-
-    return class $ extends of<*, From, To>(_) {
-      constructor(...args) {
-        super(...args)
-
-        console.log('init', 2, this.props, super.props)
-      }
-
-      onClick(): void {
-        super.onClick()
-      }
-
-      lift() {
-        console.log(this)
-
-        return $.lift(merge(super.props, {a22: 'x'}))
-      }
-    }
-  },
-)
-
-class App2 extends enhance2(class extends Component<{a: 1}> {}) {
-  render() {
-    console.log('render', this.props, super.props)
-
-    return (
-      <div>
-        <button onClick={this.onClick}>click</button>
-        <p>props: {JSON.stringify(super.props, null, 4)}</p>
-      </div>
-    )
-  }
-}
+//
+// const enhance2 = fold(
+//   (_) => {
+//     type Props = $Props<_>
+//     type From = {|wow2: boolean|}
+//     type To = {|a12: number, a32: number|}
+//
+//     (assert<Props, From>())
+//
+//     return class $ extends of<*, From, To>(_) {
+//       constructor(...args) {
+//         super(...args)
+//
+//         console.log('init', 1, this.props, super.props)
+//       }
+//
+//       onClick(): void {
+//         console.log('click', 1, super.props)
+//       }
+//
+//       lift() {
+//         console.log(this)
+//
+//         return $.lift({a12: 1, a32: 2})
+//       }
+//     }
+//   },
+//
+//   (_) => {
+//     type Props = $Props<_>
+//     type From = {|...Props, a1: number, y: string|}
+//     type To = {|...From, a2: boolean, y: number|}
+//
+//     (assert<Props, From>())
+//
+//     return class $ extends of<*, From, To>(_) {
+//       constructor(...args) {
+//         super(...args)
+//
+//         console.log('init', 2, this.props, super.props)
+//       }
+//
+//       onClick(): void {
+//         super.onClick()
+//       }
+//
+//       lift() {
+//         return $.lift(merge(super.props, {a2: true, y: 1}))
+//       }
+//     }
+//   },
+//
+//   (_) => {
+//     type Props = $Props<_>
+//     type From = {|a2: boolean, x: number|}
+//     type To = {|...From, a22: string|}
+//
+//     (assert<Props, From>())
+//
+//     return class $ extends of<*, From, To>(_) {
+//       constructor(...args) {
+//         super(...args)
+//
+//         console.log('init', 2, this.props, super.props)
+//       }
+//
+//       onClick(): void {
+//         super.onClick()
+//       }
+//
+//       lift() {
+//         console.log(this)
+//
+//         return $.lift(merge(super.props, {a22: 'x'}))
+//       }
+//     }
+//   },
+// )
+//
+// class App2 extends enhance2(class extends Component<{a: 1}> {}) {
+//   render() {
+//     console.log('render', this.props, super.props)
+//
+//     return (
+//       <div>
+//         <button onClick={this.onClick}>click</button>
+//         <p>props: {JSON.stringify(super.props, null, 4)}</p>
+//       </div>
+//     )
+//   }
+// }
