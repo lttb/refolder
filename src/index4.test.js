@@ -4,6 +4,10 @@ import React, {Component, type ComponentType, type Node} from 'react'
 
 import fold, {finalize} from './index4.js.flow'
 
+type Intersection<A, B> = $Diff<{...$Exact<A>}, $Diff<{...$Exact<A>, ...$Exact<B>}, {...$Exact<B>}>>
+type Diff<A, B> = $Diff<A, Intersection<A, B>>
+type DiffTotal<A, B> = {...$Exact<Diff<A, B>>, ...$Exact<Diff<B, A>>}
+
 declare function _assert<B, A: B>(): void
 declare function assert<A, B>(): (
   $Call<_assert<
@@ -38,8 +42,8 @@ declare function __p<T>(T): {}
 
 type _p<T> = $Call<typeof p, T>
 
-type $Props<T> = $Call<typeof p, T>
-type __Props<T> = $Call<typeof __p, T>
+type $Props<T> = {|...$Exact<$PropertyType<T, '$props'>>|}
+type __Props<T> ={|...$Exact<$PropertyType<T, '$$props'>>|}
 
 // const merge = <A: {}, B: {}>(a: A, b: B): {|...$Exact<A>, ...$Exact<B>|} =>
 
@@ -67,11 +71,11 @@ const enhance = fold(
   (_) => {
     type Props = $Props<_>
     type From = {|wow: boolean|}
-    type To = {|a1: number, a3: number|}
+    type To = {|...From, a1: number, a3: string|}
 
     (assert<Props, From>())
 
-    return class $ extends of<*, From, To, {x: 1}>(_) {
+    return class $ extends of<*, From, To, {}>(_) {
       constructor(...args) {
         super(...args)
 
@@ -84,8 +88,9 @@ const enhance = fold(
 
       lift() {
         console.log(this)
+        const x = merge(super.props, {a1: 1, a3: 2})
 
-        return $.lift({a1: 1, a3: 2})
+        return $.lift('x')
       }
     }
   },
@@ -95,7 +100,7 @@ const enhance = fold(
     type From = {|...Props, a1: number, y: string|}
     type To = {|...From, a2: string, y: number|}
 
-    declare var x: {...__Props<_>}
+    declare var x: {...$Exact<DiffTotal<Props, From>>}
 
     (assert<Props, From>())
 
