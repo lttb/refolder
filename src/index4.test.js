@@ -80,11 +80,13 @@ function merge(...args) {
   return args.reduce((acc, value) => Object.assign(acc, value), {})
 }
 
-const tst = <T, From>(): {...$Exact<DiffTotal<$Props<T>, From>>, ...__Props<T>} => {
-  declare var res: __Props<T>
+// const tst = <T, From>(): {...$Exact<DiffTotal<$Props<T>, From>>, ...__Props<T>} => {
+//   declare var res: __Props<T>
+//
+//   return res
+// }
 
-  return res
-}
+declare function tst<T, From>(): {...$Exact<DiffTotal<$Props<T>, From>>, ...__Props<T>}
 
 const enhance = fold(
   (_) => {
@@ -121,7 +123,7 @@ const enhance = fold(
     type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
 
     const x = tst<_, From>()
-    declare var x1: {...typeof x}
+    declare var x1: typeof x
 
     (assert<Props, From>())
 
