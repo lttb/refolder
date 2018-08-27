@@ -51,7 +51,7 @@ const of = <T: *, Enhance, Base, Total>(
       $Exact<Enhance>,
       $Exact<Base>,
       $Exact<Total>,
-      // $Exact<{...$Exact<DiffTotal<$Props<Class<T>>, Enhance>>, ...__Props<Class<T>>}>,
+      // $Exact<{...$Exact<DiffTotal<$Props<Class<T>>, Enhance>>, ...__Props<Class<T>>}>
     > & T
   >
 > => class extends _ {props: any; $props: any; static lift: any; $$props: any}
@@ -78,6 +78,12 @@ declare function merge<A: {}, B: {}, C: {}, D: {}>(A, B, C, D): {|
 
 function merge(...args) {
   return args.reduce((acc, value) => Object.assign(acc, value), {})
+}
+
+const tst = <T, From>(): {...$Exact<DiffTotal<$Props<T>, From>>, ...__Props<T>} => {
+  declare var res: __Props<T>
+
+  return res
 }
 
 const enhance = fold(
@@ -114,6 +120,9 @@ const enhance = fold(
 
     type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
 
+    const x = tst<_, From>()
+    declare var x1: {...typeof x}
+
     (assert<Props, From>())
 
     return class $ extends of<*, From, To, __>(_) {
@@ -137,10 +146,13 @@ const enhance = fold(
 
   (_) => {
     type Props = $Props<_>
-    type From = {|...Props, a2: string, y: number|}
+    type From = {|...Props, a2: string, y: number, hah: string|}
     type To = {|...From, a3: number, y: boolean, x: string|}
 
     type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
+
+    const x = tst<_, From>()
+    declare var x1: {...typeof x}
 
     (assert<Props, From>())
 
