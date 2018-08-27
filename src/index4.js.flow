@@ -7,8 +7,9 @@ declare function p<T>(T): {}
 
 type $Props<T> = $Call<typeof p, T>
 
-declare class O<Enhance, Base, S = any> {
+declare class O<Enhance, Base, Total, S = any> {
   props: {|...Enhance|};
+  $$props: {|...Enhance|};
   self: S;
   $props: {|...Base|};
   static lift: ({|...Base|}) => Node;
@@ -40,8 +41,8 @@ declare function f<$, A1, A2>(A1, A2): (<B>(Base: B) => (
 ))
 declare function f<$, A1, A2, A3>(A1, A2, A3): (<P, T, B>(Base: B, P) => (
   $Call<$Call<$ComposeReverse, typeof init, A1, A2, A3, (
-    (_: Class<T>) => Class<O<$Props<T>, $Props<T>> & T>
-  ), P>, B>
+    (_: Class<T>) => Class<O<$Props<T>, $Props<T>, $Props<T>> & T>
+  )>, B>
 ))
 declare function f<$, A1, A2, A3, A4>(A1, A2, A3, A4): (<B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1, A2, A3, A4>, B>

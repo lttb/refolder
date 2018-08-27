@@ -12,28 +12,34 @@ declare function assert<A, B>(): (
   >>
 )
 
-declare class O<Enhance, Base, S = any> {
+declare class O<Enhance, Base, Total, S = any> {
   props: {|...Enhance|};
   self: S;
   $props: {|...Base|};
+  $$props: {|...$Exact<Enhance>, ...$Exact<Total>|};
   static lift: ({|...Base|}) => Node;
 }
 
-const of = <T: *, Enhance, Base>(
+const of = <T: *, Enhance, Base, Total>(
   _: Class<T>,
 ): $Supertype<
-  & Class<O<$Exact<Enhance>, $Exact<Base>>
-  & T
->> => class extends _ {props: any; $props: any; static lift: any}
+  & Class<
+    O<$Exact<Enhance>, $Exact<Base>, Total> & T
+  >
+> => class extends _ {props: any; $props: any; static lift: any; $$props: any}
 
 /* eslint-disable no-redeclare */
 
 declare function p<T>(T): {|...$PropertyType<T, '$props'>|}
 declare function p<T>(T): {}
 
+declare function __p<T>(T): {|...$PropertyType<T, '$$props'>|}
+declare function __p<T>(T): {}
+
 type _p<T> = $Call<typeof p, T>
 
 type $Props<T> = $Call<typeof p, T>
+type __Props<T> = $Call<typeof __p, T>
 
 // const merge = <A: {}, B: {}>(a: A, b: B): {|...$Exact<A>, ...$Exact<B>|} =>
 
@@ -65,7 +71,7 @@ const enhance = fold(
 
     (assert<Props, From>())
 
-    return class $ extends of<*, From, To>(_) {
+    return class $ extends of<*, From, To, {x: 1}>(_) {
       constructor(...args) {
         super(...args)
 
@@ -73,7 +79,7 @@ const enhance = fold(
       }
 
       onClick(): void {
-        console.log('click', 1, super.props)
+        console.log('click', 1, super.props, super.$props, super.$$props)
       }
 
       lift() {
@@ -89,13 +95,15 @@ const enhance = fold(
     type From = {|...Props, a1: number, y: string|}
     type To = {|...From, a2: string, y: number|}
 
+    declare var x: {...__Props<_>}
+
     (assert<Props, From>())
 
-    return class $ extends of<*, From, To>(_) {
+    return class $ extends of<*, From, To, __Props<_>>(_) {
       constructor(...args) {
         super(...args)
 
-        console.log('init', 2, this.props, super.props)
+        console.log('init', 2, this.props, super.props, super.$props, super.$$props)
       }
 
       onClick(): void {
@@ -113,13 +121,15 @@ const enhance = fold(
     type From = {|a2: string, y: number|}
     type To = {|...From, a3: number, x: string|}
 
+    declare var x: {...__Props<_>}
+
     (assert<Props, From>())
 
-    return class $ extends of<*, From, To>(_) {
+    return class $ extends of<*, From, To, __Props<_>>(_) {
       constructor(...args) {
         super(...args)
 
-        console.log('init', 2, this.props, super.props)
+        console.log('init', 2, this.props, super.props, super.$$props)
       }
 
       onClick(): void {
@@ -135,17 +145,20 @@ const enhance = fold(
   },
 )
 
+const _ = enhance(Component)
 
-class App extends enhance(Component, (_) => {
-  type _Props = $Props<_>
-  type Props = {..._Props, x: string}
+type Own = {|x: string|}
+type Base = $Props<_>
 
-  (assert<_Props, Props>())
+(assert<Base, Own>())
 
-  return class extends of<*, Props, Props>(_) {}
-}) {
+type Props = {...Base, ...Own}
+
+class Enhanced extends of<*, Props, Props, __Props<_>>(_) {}
+
+class App extends Enhanced {
   render() {
-    console.log('render', this.props, super.props)
+    console.log('render', this.props, super.props, super.$$props)
 
     return (
       <div>
@@ -155,6 +168,8 @@ class App extends enhance(Component, (_) => {
     )
   }
 }
+
+export default ((App: any): ComponentType<{aa: 1}>)
 
 // class App extends enhance<{x: 1}, *, *>(Component) {
 //   render() {
@@ -169,7 +184,6 @@ class App extends enhance(Component, (_) => {
 //   }
 // }
 
-export default ((App: any): ComponentType<{aa: 1}>)
 
 //
 // const enhance2 = fold(
