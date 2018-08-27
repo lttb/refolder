@@ -20,17 +20,9 @@ declare class O<Enhance, Base, Total, S = any> {
   props: {|...Enhance|};
   self: S;
   $props: {|...Base|};
-  $$props: {|...$Exact<Enhance>, ...$Exact<Total>|};
+  $$props: {|...Total|};
   static lift: ({|...Base|}) => Node;
 }
-
-const of = <T: *, Enhance, Base, Total>(
-  _: Class<T>,
-): $Supertype<
-  & Class<
-    O<$Exact<Enhance>, $Exact<Base>, Total> & T
-  >
-> => class extends _ {props: any; $props: any; static lift: any; $$props: any}
 
 /* eslint-disable no-redeclare */
 
@@ -42,8 +34,29 @@ declare function __p<T>(T): {}
 
 type _p<T> = $Call<typeof p, T>
 
-type $Props<T> = {|...$Exact<$PropertyType<T, '$props'>>|}
-type __Props<T> ={|...$Exact<$PropertyType<T, '$$props'>>|}
+type $Props<T> = $Call<
+  & (<V>(V) => {|...$Exact<$PropertyType<V, '$props'>>|})
+  & (<V>(V) => {||})
+, T>
+type __Props<T> = $Call<
+  & (<V>(V) => {|...$Exact<$PropertyType<V, '$$props'>>|})
+  & (<V>(V) => {||})
+, T>
+
+const of = <T: *, Enhance, Base, Total>(
+  _: Class<T>,
+): $Supertype<
+  & Class<
+    O<
+      $Exact<Enhance>,
+      $Exact<Base>,
+      $Exact<Total>,
+      // $Exact<{...$Exact<DiffTotal<$Props<Class<T>>, Enhance>>, ...__Props<Class<T>>}>,
+    > & T
+  >
+> => class extends _ {props: any; $props: any; static lift: any; $$props: any}
+
+
 
 // const merge = <A: {}, B: {}>(a: A, b: B): {|...$Exact<A>, ...$Exact<B>|} =>
 
@@ -70,12 +83,14 @@ function merge(...args) {
 const enhance = fold(
   (_) => {
     type Props = $Props<_>
-    type From = {|wow: boolean|}
+    type From = {|...Props, wow: boolean|}
     type To = {|...From, a1: number, a3: string|}
+
+    type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
 
     (assert<Props, From>())
 
-    return class $ extends of<*, From, To, {}>(_) {
+    return class $ extends of<*, From, To, __>(_) {
       constructor(...args) {
         super(...args)
 
@@ -87,24 +102,21 @@ const enhance = fold(
       }
 
       lift() {
-        console.log(this)
-        const x = merge(super.props, {a1: 1, a3: 2})
-
-        return $.lift('x')
+        return $.lift(merge(super.props, {a1: 1, a3: 'x'}))
       }
     }
   },
 
   (_) => {
     type Props = $Props<_>
-    type From = {|...Props, a1: number, y: string|}
+    type From = {|...Props, a1: number, y: string, heh: string|}
     type To = {|...From, a2: string, y: number|}
 
-    declare var x: {...$Exact<DiffTotal<Props, From>>}
+    type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
 
     (assert<Props, From>())
 
-    return class $ extends of<*, From, To, __Props<_>>(_) {
+    return class $ extends of<*, From, To, __>(_) {
       constructor(...args) {
         super(...args)
 
@@ -116,6 +128,8 @@ const enhance = fold(
       }
 
       lift() {
+        const {heh, ...rest} = super.props
+
         return $.lift(merge(super.props, {a2: 'test', y: 1}))
       }
     }
@@ -123,14 +137,14 @@ const enhance = fold(
 
   (_) => {
     type Props = $Props<_>
-    type From = {|a2: string, y: number|}
-    type To = {|...From, a3: number, x: string|}
+    type From = {|...Props, a2: string, y: number|}
+    type To = {|...From, a3: number, y: boolean, x: string|}
 
-    declare var x: {...__Props<_>}
+    type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
 
     (assert<Props, From>())
 
-    return class $ extends of<*, From, To, __Props<_>>(_) {
+    return class $ extends of<*, From, To, __>(_) {
       constructor(...args) {
         super(...args)
 
@@ -144,26 +158,24 @@ const enhance = fold(
       lift() {
         console.log(this)
 
-        return $.lift(merge(super.props, {a3: 2, x: 'x'}))
+        return $.lift(merge(super.props, {a3: 2, y: true, x: 'test'}))
       }
     }
   },
 )
 
-const _ = enhance(Component)
+const _ = enhance(class extends Component<{}> {})
 
-type Own = {|x: string|}
-type Base = $Props<_>
+type Props = $Props<_>
+type From = {|...Props, x: string|}
 
-(assert<Base, Own>())
+type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
 
-type Props = {...Base, ...Own}
+(assert<Props, From>())
 
-class Enhanced extends of<*, Props, Props, __Props<_>>(_) {}
-
-class App extends Enhanced {
+class App extends of<*, From, From, __>(_) {
   render() {
-    console.log('render', this.props, super.props, super.$$props)
+    console.log('render', this.props, super.props, super.$props, super.$$props)
 
     return (
       <div>
@@ -174,7 +186,7 @@ class App extends Enhanced {
   }
 }
 
-export default ((App: any): ComponentType<{aa: 1}>)
+export default ((App: any): ComponentType<__Props<_>>)
 
 // class App extends enhance<{x: 1}, *, *>(Component) {
 //   render() {

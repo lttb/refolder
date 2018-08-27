@@ -5,13 +5,20 @@
 declare function p<T>(T): {|...$PropertyType<T, '$props'>|}
 declare function p<T>(T): {}
 
-type $Props<T> = $Call<typeof p, T>
+type $Props<T> = $Call<
+  & (<V>(V) => {|...$Exact<$PropertyType<V, '$props'>>|})
+  & (<V>(V) => {||})
+, T>
+type __Props<T> = $Call<
+  & (<V>(V) => {|...$Exact<$PropertyType<V, '$$props'>>|})
+  & (<V>(V) => {||})
+, T>
 
 declare class O<Enhance, Base, Total, S = any> {
   props: {|...Enhance|};
-  $$props: {|...Enhance|};
   self: S;
   $props: {|...Base|};
+  $$props: {|...Total|};
   static lift: ({|...Base|}) => Node;
 }
 
@@ -21,7 +28,15 @@ const of = <T: *, Enhance, Base>(
   & Class<O<$Exact<Enhance>, $Exact<Base>> & T>
 > => class extends _ {props: any; $props: any; static lift: any}
 
-const init = _ => class extends _<any> {}
+// const init = <T: *>(_: T) => class extends _<any> {
+//   static lift: any
+// }
+
+function init<T: *>(_: Class<T>): $Supertype<
+  & Class<O<{||}, {||}, {||}> & T>
+> {
+  return class extends _ {props: any; $props: any; static lift: any}
+}
 
 // function finalize(_) {
 //   type Props = $Props<_>
@@ -39,9 +54,9 @@ declare function f<$, A1>(A1): (<B>(Base: B) => (
 declare function f<$, A1, A2>(A1, A2): (<B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1, A2>, B>
 ))
-declare function f<$, A1, A2, A3>(A1, A2, A3): (<P, T, B>(Base: B, P) => (
-  $Call<$Call<$ComposeReverse, typeof init, A1, A2, A3, (
-    (_: Class<T>) => Class<O<$Props<T>, $Props<T>, $Props<T>> & T>
+declare function f<$, A1, A2, A3>(A1, A2, A3): (<P, T, T2, B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1, A2, A3, (
+    (_: Class<T>) => Class<O<$Props<T>, $Props<T>, __Props<T>> & T>
   )>, B>
 ))
 declare function f<$, A1, A2, A3, A4>(A1, A2, A3, A4): (<B>(Base: B) => (
