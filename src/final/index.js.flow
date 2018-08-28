@@ -29,5 +29,10 @@ declare function f<$, A1, A2, A3, A4, A5>(A1, A2, A3, A4, A5): (<T, B>(Base: B) 
     (_: Class<T>) => Class<O<$Props<T>, $Props<T>> & T>
   )>, B>
 ))
+declare function f<$, A1, A2, A3, A4, A5, A6>(A1, A2, A3, A4, A5, A6): (<T, B>(Base: B) => (
+  $Call<$Call<$ComposeReverse, A1, A2, A3, A4, A5, A6, (
+    (_: Class<T>) => Class<O<$Props<T>, $Props<T>> & T>
+  )>, B>
+))
 
 export default f

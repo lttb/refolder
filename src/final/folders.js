@@ -28,7 +28,7 @@ export class O3<T, Int, Enhance: Int, Base> {
 
 declare class O1 {}
 
-export type Extended<T, Enhance, Base, O = O1, V = *, Props = *> = $Supertype<
+export type Folder<T, Enhance, Base, O = O1, V = *, Props = *> = $Supertype<
   & Class<
     & O & O4<T, Enhance> & O3<
       T,
@@ -47,4 +47,4 @@ export type Enhance = {lol: 'lol', a4: string}
 export type Base = {kek: 'kek'}
 */
 
-declare export function folder<T>(Class<T>): Extended<T, Enhance, Base>
+declare export function folder<T>(Class<T>): Folder<T, Enhance, Base>
