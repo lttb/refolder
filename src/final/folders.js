@@ -26,9 +26,11 @@ export class O3<T, Int, Enhance: Int, Base> {
 //   >
 // >
 
-type Extended<T, Enhance, Base, V = *, Props = *> = $Supertype<
+declare class O1 {}
+
+export type Extended<T, Enhance, Base, O = O1, V = *, Props = *> = $Supertype<
   & Class<
-    & O4<T, Enhance> & O3<
+    & O & O4<T, Enhance> & O3<
       T,
       Intersection<$Props<T>, Enhance>,
       Enhance,

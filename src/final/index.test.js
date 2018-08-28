@@ -1,15 +1,44 @@
 /* @flow */
 
+
+/* eslint-disable flowtype/space-before-type-colon */
+
 import React, { Component, type ComponentType } from 'react'
 
 import fold from './'
 import { of as by, merge, type $$Props } from './helpers'
 
-import {folder, Enhance, Base} from './folders'
+import {folder, type Extended} from './folders'
 
 // function folder<A, T: *>(_: Class<T>) {
 //   return by<T, {lol: 'lol', a4: number}, {kek: 'kek'}>(_)
 // }
+
+// const lolkaFolder = <T: *>(_: Class<T>) => {
+//   class $ extends _ {
+//     static lolochka(): null {
+//       return null
+//     }
+//   }
+//
+//   return ($: Extended<_, {kaka: 'ha'}, {lolka: 'da'}, $>)
+// }
+
+declare class Lolka {
+  static lolochka(): null
+}
+
+const lolkaFolder
+  : <T: *>(Class<T>) => Extended<T, {kaka: 'ha'}, {lolka: 'da'}, Lolka>
+  = _ => class $ extends _ {
+    static lolochka(): null {
+      return null
+    }
+
+    heh() {
+      super.hoh()
+    }
+  }
 
 const enhance = fold(
   _ => class MyClass extends by<_,
@@ -50,6 +79,10 @@ const enhance = fold(
       super.onClick()
     }
 
+    hoh(): number {
+      return 1
+    }
+
     lift() {
       console.log(super.props)
 
@@ -58,12 +91,15 @@ const enhance = fold(
   },
 
   _ => folder<_>(_),
+  _ => lolkaFolder<_>(_),
 )
 
 const _ = enhance(class extends Component<{}> {})
 
 class App extends _ {
   render() {
+    super.hoh()
+
     console.log(super.props)
   }
 }
@@ -72,7 +108,7 @@ export default ((App: any): ComponentType<$$Props<_>>)
 
 
 const enhance2 = fold(
-  _ => class MyClass extends by<_,
+  _ => class MyClass2 extends by<_,
     {wow: boolean},
     <P>(P) => { ...P, a11: number, a31: string }
   >(_) {
@@ -81,17 +117,27 @@ const enhance2 = fold(
     }
 
     lift() {
-      return MyClass.lift(merge(super.props, { a11: 1, a31: 'x' }))
+      return MyClass2.lift(merge(super.props, { a11: 1, a31: 'x' }))
+    }
+
+    hoh(): string {
+      return 'heh'
     }
   },
 
   _ => folder<_>(_),
+  _ => lolkaFolder<_>(_),
 )
 
 const _2 = enhance2(class extends Component<{}> {})
 
 class App2 extends _2 {
   render() {
+    super.onClick()
+    App2.lolochka()
+
+    super.hoh()
+
     console.log(super.props)
   }
 }
