@@ -113,7 +113,11 @@ declare export function of<T, Enhance, Fn>(mixed, any): $Supertype<
       T,
       Intersection<$Props<T>, Enhance>,
       Enhance,
-      $Exact<$Call<Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>,
+      // $Exact<$Call<Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>,
+      $Exact<$Call<(
+        & (<V, Props>(V: Function, Props) => $Call<Fn, Props>)
+        & (<V, Props>(V, Props) => {...Props, ...$Exact<V>})
+      ), Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>
     > & T
   >
 >
