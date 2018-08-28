@@ -56,7 +56,7 @@ declare function f<$, A1, A2>(A1, A2): (<B>(Base: B) => (
 ))
 declare function f<$, A1, A2, A3>(A1, A2, A3): (<P, T, T2, B>(Base: B) => (
   $Call<$Call<$ComposeReverse, A1, A2, A3, (
-    (_: Class<T>) => Class<O<$Props<T>, $Props<T>, __Props<T>> & T>
+    (_: Class<T>) => Class<O<$Props<T>, $Props<T>, $Props<T>> & T>
   )>, B>
 ))
 declare function f<$, A1, A2, A3, A4>(A1, A2, A3, A4): (<B>(Base: B) => (

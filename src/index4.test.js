@@ -16,12 +16,15 @@ declare function assert<A, B>(): (
   >>
 )
 
-declare class O<Enhance, Base, Total, S = any> {
+declare class O<Enhance, Base, S = any> {
   props: {|...Enhance|};
   self: S;
   $props: {|...Base|};
-  $$props: {|...Total|};
   static lift: ({|...Base|}) => Node;
+}
+
+declare class O2<Total> {
+  $$props: {|...$Exact<Total>, x: 1|};
 }
 
 /* eslint-disable no-redeclare */
@@ -43,18 +46,19 @@ type __Props<T> = $Call<
   & (<V>(V) => {||})
 , T>
 
-const of = <T: *, Enhance, Base, Total>(
-  _: Class<T>,
-): $Supertype<
+const of = <T, Enhance, Fn>(_): $Supertype<
   & Class<
-    O<
-      $Exact<Enhance>,
-      $Exact<Base>,
-      $Exact<Total>,
+    O2<
+      __Props<T>,
+      // $Exact<{...$Exact<DiffTotal<$Props<T>, {...$Props<T>, ...$Exact<Enhance>}>>, ...__Props<T>}>,
+    > & O<
+      $Exact<{...$Props<T>, ...$Exact<Enhance>}>,
+      $Exact<$Call<Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>,
+      // $Exact<{...$Exact<DiffTotal<$Props<T>, {...$Props<T>, ...$Exact<Enhance>}>>, ...__Props<T>}>,
       // $Exact<{...$Exact<DiffTotal<$Props<Class<T>>, Enhance>>, ...__Props<Class<T>>}>
     > & T
   >
-> => class extends _ {props: any; $props: any; static lift: any; $$props: any}
+> => class extends _ {props: any; $props: any; $$props: any; static lift: any;}
 
 
 
@@ -90,21 +94,13 @@ declare function tst<T, From>(): {...$Exact<DiffTotal<$Props<T>, From>>, ...__Pr
 
 const enhance = fold(
   (_) => {
-    type Props = $Props<_>
-    type From = {|...Props, wow: boolean|}
-    type To = {|...From, a1: number, a3: string|}
+    type N = null
 
-    type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
-
-    (assert<Props, From>())
-
-    return class $ extends of<*, From, To, __>(_) {
-      constructor(...args) {
-        super(...args)
-
-        console.log('init', 1, this.props, super.props)
-      }
-
+    return class $ extends of<
+      _,
+      {wow: boolean},
+      <Props>(Props) => {...Props, a1: number, a3: string}
+    >(_) {
       onClick(): void {
         console.log('click', 1, super.props, super.$props, super.$$props)
       }
@@ -116,91 +112,59 @@ const enhance = fold(
   },
 
   (_) => {
-    type Props = $Props<_>
-    type From = {|...Props, a1: number, y: string, heh: string|}
-    type To = {|...From, a2: string, y: number|}
+    type N = null
 
-    type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
-
-    const x = tst<_, From>()
-    declare var x1: typeof x
-
-    (assert<Props, From>())
-
-    return class $ extends of<*, From, To, __>(_) {
-      constructor(...args) {
-        super(...args)
-
-        console.log('init', 2, this.props, super.props, super.$props, super.$$props)
-      }
-
+    return class $ extends of<
+      _,
+      {a1: number, y: string, heh: string},
+      <Props>(Props) => {...Props, a2: string, y: number}
+    >(_) {
       onClick(): void {
+        console.log('click', 2, super.props, super.$$props, super.$props)
+
         super.onClick()
       }
 
       lift() {
-        const {heh, ...rest} = super.props
-
         return $.lift(merge(super.props, {a2: 'test', y: 1}))
-      }
-    }
-  },
-
-  (_) => {
-    type Props = $Props<_>
-    type From = {|...Props, a2: string, y: number, hah: string|}
-    type To = {|...From, a3: number, y: boolean, x: string|}
-
-    type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
-
-    const x = tst<_, From>()
-    declare var x1: {...typeof x}
-
-    (assert<Props, From>())
-
-    return class $ extends of<*, From, To, __>(_) {
-      constructor(...args) {
-        super(...args)
-
-        console.log('init', 2, this.props, super.props, super.$$props)
-      }
-
-      onClick(): void {
-        super.onClick()
-      }
-
-      lift() {
-        console.log(this)
-
-        return $.lift(merge(super.props, {a3: 2, y: true, x: 'test'}))
       }
     }
   },
 )
 
-const _ = enhance(class extends Component<{}> {})
+const _ = enhance(class extends Component<{}> {
+  $$props: {y: 1}
+})
 
-type Props = $Props<_>
-type From = {|...Props, x: string|}
-
-type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
-
-(assert<Props, From>())
-
-class App extends of<*, From, From, __>(_) {
+class App extends _ {
   render() {
-    console.log('render', this.props, super.props, super.$props, super.$$props)
-
-    return (
-      <div>
-        <button onClick={this.onClick}>click</button>
-        <p>props: {JSON.stringify(super.props, null, 4)}</p>
-      </div>
-    )
+    console.log(super.props)
   }
 }
 
 export default ((App: any): ComponentType<__Props<_>>)
+
+// type Props = $Props<_>
+// type From = {|...Props, x: string|}
+//
+// type __ = {...$Exact<DiffTotal<Props, From>>, ...__Props<_>}
+//
+// (assert<Props, From>())
+//
+// class App extends of<*, From, From, __>(_) {
+//   render() {
+//     console.log('render', this.props, super.props, super.$props, super.$$props)
+//
+//     return (
+//       <div>
+//         <button onClick={this.onClick}>click</button>
+//         <p>props: {JSON.stringify(super.props, null, 4)}</p>
+//       </div>
+//     )
+//   }
+// }
+//
+// export default ((App: any): ComponentType<__Props<_>>)
 
 // class App extends enhance<{x: 1}, *, *>(Component) {
 //   render() {
