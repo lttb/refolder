@@ -83,17 +83,18 @@ export type $$Props<T> = $Call<
 //   return class extends _ {props: any; $props: any; $$props: any; static lift: any;}
 // }
 
-class O4<T, Enhance> {
-  $$props: $Exact<{...$Exact<DiffTotal<$Props<T>, $Exact<{...$Props<T>, ...$Exact<Enhance>}>>>, ...$$Props<T>}>;
+export class O4<T, Enhance> {
+  $$props: $Exact<{
+    ...$Exact<DiffTotal<$Props<T>, $Exact<{...$Props<T>, ...$Exact<Enhance>}>>>,
+    ...$$Props<T>
+  }>;
 }
 
-class O3<T, Int, Enhance: Int, Base> {
+export class O3<T, Int, Enhance: Int, Base> {
   props: {|...$Exact<{...$Props<T>, ...$Exact<Enhance>}>|};
   $props: {|...Base|};
   static lift: ({|...Base|}) => Node;
 }
-
-class O5<T: void> {}
 
 // export const of = <T, Enhance, Fn>(_: *, cb: ?(({...$Props<T>}, Enhance) => void)): $Supertype<
 //   & Class<
@@ -107,17 +108,17 @@ class O5<T: void> {}
 //   return class extends _ {props: any; $props: any; $$props: any; static lift: any;}
 // }
 
-declare export function of<T, Enhance, Fn>(mixed, any): $Supertype<
+declare export function of<T, Enhance, Base>(Class<T>): $Supertype<
   & Class<
-    & O5<$Call<() => void>> & O4<T, Enhance> & O3<
+    & O4<T, Enhance> & O3<
       T,
       Intersection<$Props<T>, Enhance>,
       Enhance,
       // $Exact<$Call<Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>,
       $Exact<$Call<(
-        & (<V, Props>(V: Function, Props) => $Call<Fn, Props>)
+        & (<V, Props>(V: Function, Props) => $Call<Base, Props>)
         & (<V, Props>(V, Props) => {...Props, ...$Exact<V>})
-      ), Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>
+      ), Base, {|...$Props<T>, ...$Exact<Enhance>|}>>
     > & T
   >
 >
