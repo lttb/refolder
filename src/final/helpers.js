@@ -108,20 +108,38 @@ export class O3<T, Int, Enhance: Int, Base> {
 //   return class extends _ {props: any; $props: any; $$props: any; static lift: any;}
 // }
 
-declare export function of<T, Enhance, Base>(Class<T>): $Supertype<
+declare class O1 {}
+
+export type Folder<T, Enhance, Base, O0 = O1, V = *, Props = *> = $Supertype<
   & Class<
-    & O4<T, Enhance> & O3<
+    & O0 & O4<T, Enhance> & O3<
       T,
       Intersection<$Props<T>, Enhance>,
       Enhance,
-      // $Exact<$Call<Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>,
       $Exact<$Call<(
-        & (<V, Props>(V: Function, Props) => $Call<Base, Props>)
-        & (<V, Props>(V, Props) => {...Props, ...$Exact<V>})
+        & ((V: Function, Props) => $Call<Base, Props>)
+        & ((V, Props) => {...Props, ...$Exact<V>})
       ), Base, {|...$Props<T>, ...$Exact<Enhance>|}>>
     > & T
   >
 >
+
+// declare export function of<T, Enhance, Base>(Class<T>): $Supertype<
+//   & Class<
+//     & O4<T, Enhance> & O3<
+//       T,
+//       Intersection<$Props<T>, Enhance>,
+//       Enhance,
+//       // $Exact<$Call<Fn, {|...$Props<T>, ...$Exact<Enhance>|}>>,
+//       $Exact<$Call<(
+//         & (<V, Props>(V: Function, Props) => $Call<Base, Props>)
+//         & (<V, Props>(V, Props) => {...Props, ...$Exact<V>})
+//       ), Base, {|...$Props<T>, ...$Exact<Enhance>|}>>
+//     > & T
+//   >
+// >
+
+declare export function of<T, Enhance, Base>(Class<T>): Folder<T, Enhance, Base>
 
 declare function merge<A: {}>(A): {|
   ...$Exact<A>,
